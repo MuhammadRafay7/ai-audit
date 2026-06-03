@@ -1,121 +1,78 @@
 # ai-audit
 
-Framework for analyzing code changes. **Status: Alpha, unvalidated.**
+Code analysis framework for Claude Code. **Alpha status: unvalidated.**
 
 ## What This Is
 
-Instructions for Claude Code to analyze your uncommitted code for:
-- Obvious errors (missing error handling, null references, type mismatches)
-- Code quality issues (long functions, naming problems, duplication)
-- Possible AI-generated patterns (generic code, boilerplate, over-commenting)
+Instructions for Claude Code to analyze uncommitted changes for:
 
-## What's Proven
+- Obvious errors (missing error handling, null checks)
+- Code quality issues (long functions, duplication)
+- Possible AI-generated patterns
 
-Nothing yet. This has not been tested on real code.
+**Status:** Not tested on real code. Everything is theoretical.
 
-## What's Not Proven
-
-- Does it actually catch bugs?
-- What's the accuracy rate?
-- False positive rate?
-- Does AI-pattern detection work?
-- Are the heuristics sound?
-
-**We don't know. That's why we need testing.**
-
-## Installation
+## Install
 
 ```bash
-# For macOS/Linux
 mkdir -p ~/.claude/skills
-git clone <REPOSITORY_URL> ~/.claude/skills/ai-audit
-
-# For Windows PowerShell
-New-Item -ItemType Directory -Path "$env:USERPROFILE\.claude\skills" -Force
-git clone <REPOSITORY_URL> "$env:USERPROFILE\.claude\skills\ai-audit"
+git clone <repo-url> ~/.claude/skills/ai-audit
+# Restart Claude Code
 ```
 
-Then restart Claude Code.
-
-## Usage
+## Use
 
 ```bash
 cd your-project
-git add some-changes
 /ai-audit
 ```
 
 ## Help Validate
 
-This skill needs real-world testing. If you use it, **please report your results**.
+This alpha needs real-world testing. Test it on your code:
 
-### Quick Test
-1. Run `/ai-audit` on your code
-2. Check if it found real issues
-3. Check if it found false issues
-4. Open an issue with template: `/VALIDATION_TEMPLATE.md`
+1. See [VALIDATION_PROTOCOL.md](VALIDATION_PROTOCOL.md) for step-by-step
+2. Use [VALIDATION_TEMPLATE.md](VALIDATION_TEMPLATE.md) to report
+3. Test scenarios in `tests/scenarios/`
 
-### What to Report
-- Code sample (or repo link)
-- What issues exist in the code
-- What ai-audit found
-- Were they correct? Missed? False alarms?
-- Your assessment: accuracy %
+Report results: open GitHub issue with your findings.
 
-See `VALIDATION.md` for existing results and how to contribute.
+Report results: open GitHub issue with your findings.
 
-## Current Status
+## What's Known
 
-**v0.1.0-alpha**
-- Framework complete
-- Documentation complete
-- Validation: pending (help needed)
-- Real accuracy: unknown
+- Framework is complete and documented
+- It hasn't been validated on real code
+- Accuracy is unknown
+- Sample outputs are theoretical
 
-## What's Here
+## Documentation
 
-- `SKILL.md` - Instructions for analysis
-- `docs/` - Guides and documentation
-- `tests/scenarios/` - Code samples for testing
-- `tests/run-tests.sh` - Project validation (not skill validation)
+- [SKILL.md](SKILL.md) - How the analysis works
+- [VALIDATION.md](VALIDATION.md) - Testing results (contribute yours)
+- [docs/](docs/) - Guides, architecture, examples
 
-## What's Missing
+## Limitations
 
-- Real testing on actual code
-- Accuracy metrics
-- False positive rate
-- Validation from users
-- Heuristic refinement based on failures
+Can't detect:
 
-## Known Limitations
+- Architectural problems
+- Complex logic errors
+- Performance issues
+- Business logic correctness
 
-**Everything is theoretical.** Accuracy claims, sample outputs, heuristics — all are educated guesses that need validation.
+See [docs/limitations.md](docs/limitations.md) for full list.
 
-Specific unknowns:
-- AI-pattern detection is heuristic-based and unvalidated
-- Error detection limited to what can be inferred from code reading
-- Cannot detect architectural problems
-- Cannot detect complex logic errors
-- Cannot validate business logic
-- Cannot do performance analysis
+## Status
 
-## How to Help
+**v0.1.0-alpha** - Seeking validation
 
-1. **Test it** - Use it on your code, report results
-2. **Report findings** - Honest feedback (what worked, what failed)
-3. **Contribute** - Documentation, test cases, heuristic ideas
-4. **Discuss** - Open issues for any questions or observations
+Roadmap:
 
-## Contributing
-
-See `CONTRIBUTING.md` for how to contribute to development.
-
-## License
-
-MIT - Use freely.
+- v0.2: Real test data collected
+- v0.3: Heuristics refined
+- v1.0: Production-ready (after validation)
 
 ---
 
-**Version:** 0.1.0-alpha  
-**Status:** Unvalidated framework, seeking real-world testing  
-**Last updated:** 2026-06-03
+Help improve this by testing and reporting results.
