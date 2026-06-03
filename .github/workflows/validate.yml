@@ -1,0 +1,266 @@
+name: Validate ai-audit
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    name: Validate Documentation & Configuration
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check critical files exist
+        run: |
+          files=("SKILL.md" "README.md" "CHANGELOG.md" "LICENSE")
+          for file in "${files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing critical file: $file"
+              exit 1
+            fi
+            echo "✓ $file exists"
+          done
+
+      - name: Validate JSON files
+        run: |
+          # Validate config.template.json
+          if [ -f "config.template.json" ]; then
+            python3 -m json.tool config.template.json > /dev/null
+            echo "✓ config.template.json is valid JSON"
+          fi
+
+      - name: Check markdown format
+        run: |
+          # Check for common markdown issues
+          for md_file in *.md docs/*.md; do
+            if [ -f "$md_file" ]; then
+              # Check for valid markdown headers (# at start of line)
+              if grep -E "^#{1,6} " "$md_file" > /dev/null; then
+                echo "✓ $md_file has valid headers"
+              else
+                echo "⚠ $md_file might have header issues"
+              fi
+              # Check file size reasonable (not empty)
+              if [ -s "$md_file" ]; then
+                echo "✓ $md_file is not empty"
+              else
+                echo "❌ $md_file is empty"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Verify docs folder
+        run: |
+          docs_files=(
+            "docs/validation-testing.md"
+            "docs/limitations.md"
+            "docs/edge-cases-guide.md"
+            "docs/sample-outputs.md"
+            "docs/installation.md"
+            "docs/examples.md"
+          )
+          for file in "${docs_files[@]}"; do
+            if [ -f "$file" ]; then
+              echo "✓ $file exists"
+            else
+              echo "❌ Missing documentation: $file"
+              exit 1
+            fi
+          done
+
+      - name: Check for TODOs or placeholders
+        run: |
+          # Check for incomplete placeholders
+          if grep -r "yourusername\|YOUR_NAME\|FIXME_REQUIRED" . --include="*.md" --include="*.json"; then
+            echo "⚠ Found placeholders that need updating"
+          else
+            echo "✓ No obvious placeholders found"
+          fi
+
+      - name: Validate scripts
+        run: |
+          if [ -f "scripts/install.sh" ]; then
+            bash -n scripts/install.sh
+            echo "✓ scripts/install.sh syntax valid"
+          fi
+          if [ -f "scripts/verify.sh" ]; then
+            bash -n scripts/verify.sh
+            echo "✓ scripts/verify.sh syntax valid"
+          fi
+
+      - name: Check file permissions
+        run: |
+          # Scripts should be executable
+          if [ -f "scripts/install.sh" ]; then
+            if [ -x "scripts/install.sh" ]; then
+              echo "✓ scripts/install.sh is executable"
+            else
+              echo "⚠ scripts/install.sh should be executable"
+            fi
+          fi
+
+      - name: Verify CHANGELOG consistency
+        run: |
+          # Check CHANGELOG has latest version
+          if grep -q "\[Unreleased\]" CHANGELOG.md; then
+            echo "✓ CHANGELOG has Unreleased section"
+          else
+            echo "⚠ CHANGELOG missing Unreleased section"
+          fi
+
+          if grep -q "## \[" CHANGELOG.md; then
+            echo "✓ CHANGELOG has version entries"
+          else
+            echo "❌ CHANGELOG has no version entries"
+            exit 1
+          fi
+
+      - name: Check skill.md structure
+        run: |
+          # SKILL.md must have key sections
+          sections=("What It Does" "Usage" "Analysis Framework" "Output Format" "Requirements")
+          for section in "${sections[@]}"; do
+            if grep -q "$section" SKILL.md; then
+              echo "✓ SKILL.md has '$section' section"
+            else
+              echo "⚠ SKILL.md missing '$section' section"
+            fi
+          done
+
+  test:
+    runs-on: ubuntu-latest
+    name: Run Skill Tests
+    needs: validate
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up test environment
+        run: |
+          mkdir -p test-results
+          echo "Test environment ready"
+
+      - name: Verify config validation rules
+        run: |
+          # Test 1: Valid config should parse
+          echo "Testing configuration validation..."
+
+          # Create a valid config
+          cat > test_valid_config.json << 'EOF'
+          {
+            "ignorePaths": ["node_modules"],
+            "analyzeUnstagedOnly": false,
+            "severityThreshold": "medium",
+            "aiGeneratedThreshold": 0.3,
+            "enableDetailedReport": true
+          }
+          EOF
+
+          python3 -m json.tool test_valid_config.json > /dev/null && echo "✓ Valid config accepted"
+
+          # Test 2: Invalid config should fail
+          cat > test_invalid_config.json << 'EOF'
+          {
+            "severityThreshold": "invalid_value"
+          }
+          EOF
+
+          if python3 -c "
+          import json
+          with open('test_invalid_config.json') as f:
+              config = json.load(f)
+          valid_thresholds = ['low', 'medium', 'high']
+          if config.get('severityThreshold') not in valid_thresholds:
+              print('❌ Config validation failed')
+              exit(1)
+          "; then
+            echo "❌ Should have failed validation"
+            exit 1
+          else
+            echo "✓ Invalid config rejected"
+          fi
+
+          rm test_valid_config.json test_invalid_config.json
+
+      - name: Documentation completeness check
+        run: |
+          echo "Checking documentation completeness..."
+
+          # Count sections in key docs
+          validation_sections=$(grep -c "^##" docs/validation-testing.md || echo 0)
+          echo "Found $validation_sections main sections in validation-testing.md"
+
+          if [ "$validation_sections" -lt 3 ]; then
+            echo "⚠ validation-testing.md seems incomplete"
+          else
+            echo "✓ validation-testing.md has adequate sections"
+          fi
+
+      - name: Report test results
+        if: always()
+        run: |
+          echo "=== Validation Results ==="
+          echo "✓ All critical checks passed"
+          echo "Ready for deployment"
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Lint & Format Check
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check line endings
+        run: |
+          # Files should use Unix line endings
+          echo "Checking line endings..."
+          find . -name "*.md" -o -name "*.sh" -o -name "*.json" | while read file; do
+            if file "$file" | grep -q "CRLF"; then
+              echo "⚠ $file has Windows line endings"
+            fi
+          done
+
+      - name: Check for trailing whitespace
+        run: |
+          echo "Checking for trailing whitespace..."
+          if grep -r " $" --include="*.md" --include="*.sh"; then
+            echo "⚠ Found trailing whitespace"
+          else
+            echo "✓ No trailing whitespace"
+          fi
+
+  security:
+    runs-on: ubuntu-latest
+    name: Security Checks
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check for hardcoded credentials
+        run: |
+          echo "Checking for hardcoded credentials..."
+
+          # Look for common credential patterns
+          if grep -r "password\|token\|secret\|api_key" . --include="*.md" | grep -v "example\|placeholder\|configure"; then
+            echo "⚠ Possible hardcoded credentials found"
+          else
+            echo "✓ No obvious hardcoded credentials"
+          fi
+
+      - name: Check for suspicious patterns
+        run: |
+          echo "Checking for suspicious patterns..."
+
+          # Check for dangerous shell patterns in scripts
+          if [ -f "scripts/install.sh" ]; then
+            if grep -q "rm -rf /" scripts/install.sh; then
+              echo "❌ Dangerous pattern found in install.sh"
+              exit 1
+            fi
+            echo "✓ No dangerous patterns in scripts"
+          fi

@@ -311,6 +311,109 @@ Structure your response as:
 [One paragraph assessment]
 ```
 
+## 🔧 Configuration Handling
+
+**Configuration file:** `.ai-audit-config.json` (optional, in project root)
+
+### Detecting Configuration
+Check if file exists:
+```bash
+# Look for .ai-audit-config.json in current directory
+if [ -f ".ai-audit-config.json" ]; then
+  # Use configuration
+else
+  # Use defaults
+fi
+```
+
+### Valid Configuration Fields
+```json
+{
+  "ignorePaths": ["string array"],           // Paths to skip
+  "analyzeUnstagedOnly": "boolean",          // Only unstaged changes
+  "severityThreshold": "low|medium|high",    // Minimum issue level
+  "aiGeneratedThreshold": "0.0-1.0",         // AI confidence (0-1)
+  "enableDetailedReport": "boolean"          // Include code snippets
+}
+```
+
+### Configuration Validation Rules
+
+**FOR EACH FIELD:**
+
+1. **ignorePaths**
+   - Type: Array of strings
+   - Error: "ignorePaths must be array of strings"
+   - Default: `["node_modules", "dist", "build"]`
+   - Example: `["vendor", ".git", "out"]`
+
+2. **analyzeUnstagedOnly**
+   - Type: Boolean (true/false)
+   - Error: "analyzeUnstagedOnly must be true or false"
+   - Default: `false`
+   - Invalid: `"true"` (string instead of boolean)
+
+3. **severityThreshold**
+   - Type: String (must be one of: "low", "medium", "high")
+   - Error: "severityThreshold must be 'low', 'medium', or 'high'"
+   - Default: `"medium"`
+   - Invalid: `"warning"`, `1`, `HIGH`
+
+4. **aiGeneratedThreshold**
+   - Type: Number between 0.0 and 1.0
+   - Error: "aiGeneratedThreshold must be between 0 and 1"
+   - Default: `0.3`
+   - Invalid: `"0.3"` (string), `1.5` (too high), `-0.1` (negative)
+
+5. **enableDetailedReport**
+   - Type: Boolean (true/false)
+   - Error: "enableDetailedReport must be true or false"
+   - Default: `true`
+   - Invalid: `"yes"`, `1`
+
+### Error Handling
+
+**When configuration is invalid:**
+
+```
+ERROR: Invalid .ai-audit-config.json
+
+Problems found:
+1. severityThreshold: must be 'low', 'medium', or 'high'
+   Got: "warning"
+   Line: 4
+
+2. aiGeneratedThreshold: must be between 0 and 1
+   Got: 1.5
+   Line: 5
+
+SOLUTION:
+- Fix the configuration file and retry
+- Or delete .ai-audit-config.json to use defaults
+
+Using defaults for now...
+```
+
+**Report error then:**
+- Continue with defaults (fail gracefully)
+- Show what fields were invalid
+- Suggest how to fix them
+- Don't crash or hang
+
+### Default Configuration (if no file or invalid file)
+
+```json
+{
+  "ignorePaths": ["node_modules", "dist", "build", ".git", ".next"],
+  "analyzeUnstagedOnly": false,
+  "severityThreshold": "medium",
+  "aiGeneratedThreshold": 0.3,
+  "enableDetailedReport": true
+}
+```
+
+---
+
 ## ⚙️ Implementation Rules
 
 **MUST DO:**
@@ -319,6 +422,9 @@ Structure your response as:
 - ✓ Report with specific file:line references
 - ✓ Provide actionable recommendations
 - ✓ Be honest about confidence levels
+- ✓ Validate configuration file if present
+- ✓ Report configuration errors clearly
+- ✓ Fail gracefully (use defaults if config bad)
 
 **MUST NOT DO:**
 - ✗ Make up issues that don't exist
@@ -326,12 +432,16 @@ Structure your response as:
 - ✗ Ignore language-specific considerations
 - ✗ Use vague descriptions ("refactor this")
 - ✗ Claim 100% accuracy on AI detection (it's heuristic-based)
+- ✗ Crash on invalid configuration
+- ✗ Silently ignore configuration errors
+- ✗ Apply invalid configuration
 
 **BE REALISTIC:**
 - Acknowledge if changes look clean
 - Note if AI detection is uncertain
 - Don't over-analyze minor code style issues
 - Focus on real problems that affect functionality
+- Report configuration problems clearly before analysis
 
 ## 🚀 Usage
 

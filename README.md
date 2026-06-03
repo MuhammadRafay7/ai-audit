@@ -19,23 +19,36 @@ Automatically analyzes all uncommitted code changes to identify errors, code qua
 
 ## 📦 Installation
 
-### Option 1: Local Installation (Recommended)
+### Option 1: Git Clone (Recommended)
 
-1. Clone or download this skill into your Claude Code skills directory:
+If you have the skill in a git repository:
 
 ```bash
 # For macOS/Linux
 mkdir -p ~/.claude/skills
-git clone https://github.com/yourusername/ai-audit ~/.claude/skills/ai-audit
+git clone <REPOSITORY_URL> ~/.claude/skills/ai-audit
 
-# For Windows
-mkdir %USERPROFILE%\.claude\skills
-git clone https://github.com/yourusername/ai-audit %USERPROFILE%\.claude\skills\ai-audit
+# For Windows PowerShell
+New-Item -ItemType Directory -Path "$env:USERPROFILE\.claude\skills" -Force
+git clone <REPOSITORY_URL> "$env:USERPROFILE\.claude\skills\ai-audit"
 ```
 
-2. Restart Claude Code (or reload in VS Code extension)
+Replace `<REPOSITORY_URL>` with your repo URL:
+- GitHub: `https://github.com/username/ai-audit`
+- Local: `file:///path/to/ai-audit`
 
-3. Start using the skill with `/ai-audit`
+Then restart Claude Code and use `/ai-audit`
+
+### Option 1b: Download & Copy
+If no git repo available:
+
+```bash
+# Download the skill files
+# Place in: ~/.claude/skills/ai-audit/ (macOS/Linux)
+# Place in: %USERPROFILE%\.claude\skills\ai-audit (Windows)
+
+# Then restart Claude Code
+```
 
 ### Option 2: Add to Your Project
 
