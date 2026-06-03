@@ -1,6 +1,12 @@
-# ai-audit Skill 🔍
+# ai-audit Skill
 
-Analyzes all uncommitted code changes to identify errors, code quality issues, AI-generated patterns, duplications, and best practice violations.
+⚠️ **Status: Alpha, Unvalidated**
+
+Framework for analyzing uncommitted code changes.
+Not tested on real code. Heuristics are theoretical.
+Help validate by testing and reporting results.
+
+See [VALIDATION.md](../VALIDATION.md) to contribute testing results.
 
 ## ⚡ How It Works
 

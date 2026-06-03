@@ -30,54 +30,77 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ---
 
-## [1.0.0] - 2026-06-03
+## [0.1.0-alpha] - 2026-06-03
+
+### Status
+**UNVALIDATED ALPHA** - Framework complete, accuracy unknown.
+Has not been tested on real code.
+Heuristics are theoretical.
+Help validate by testing and reporting results.
+
+See [VALIDATION.md](VALIDATION.md) for how to contribute testing.
 
 ### Added - Skill Core
-- **Analysis Framework**: 6-section structured analysis (errors, AI patterns, best practices, duplication, metrics, recommendations)
-- **Weighted Scoring System**: AI-generation detection with confidence levels (Low/Moderate/High)
-- **Error Detection**: Missing error handling, null checks, type errors, security issues
-- **Code Quality Checks**: Function length, naming consistency, documentation, complexity
-- **Duplication Analysis**: Identifies repeated code patterns and extraction opportunities
-- **Quality Score**: 1-10 overall rating with actionable priorities
+- **Analysis Framework**: Instructions for Claude to analyze code for errors, quality issues, duplications
+- **Weighted Scoring System**: Framework for AI-pattern detection (low/moderate/high confidence)
+- **Error Detection heuristics**: Rules to identify missing error handling, null checks, type issues
+- **Code Quality heuristics**: Rules for function length, naming, documentation
+- **Duplication detection**: Framework to identify repeated code
+- **Quality scoring**: 1-10 rating formula
+
+### Added - Testing & Validation
+- **VALIDATION_PROTOCOL.md**: Step-by-step guide for testing ai-audit
+- **VALIDATION_TEMPLATE.md**: Format for reporting test results
+- **VALIDATION.md**: Collected results from community testing
+- **tests/scenarios/**: 3 code samples with known issues for testing
+  - 01-missing-error-handling: 2 obvious async errors
+  - 02-null-reference: 2 missing null checks
+  - 03-code-duplication: 2 identical code blocks
 
 ### Added - Documentation
-- **SKILL.md**: 556-line detailed instruction document with heuristics and decision rules
-- **README.md**: User guide with installation options and realistic expectations
-- **docs/validation-testing.md**: Testing framework with 12 test cases and accuracy targets
-- **docs/limitations.md**: Honest accuracy breakdown by category (80-90% for errors, 50-70% for AI)
-- **docs/edge-cases-guide.md**: 10 complex scenarios with decision rules (frameworks, styles, patterns)
-- **docs/sample-outputs.md**: 5 realistic examples with honest assessments
-- **docs/installation.md**: Step-by-step setup for macOS, Linux, Windows
-- **docs/examples.md**: Real-world usage patterns and workflows
-- **docs/project-structure-rationale.md**: Explains purpose of each file
+- **README.md**: Honest status - unproven alpha framework
+- **SKILL.md**: Instructions for Claude with analysis rules and heuristics
+- **docs/**: 8 comprehensive guides
+- **CLAUDE.md**: Developer guidelines
+- **CONTEXT.md**: Architecture and design decisions
+- **CONTRIBUTING.md**: How to contribute
 
-### Added - Developer Support
-- **CLAUDE.md**: Maintenance and contribution guidelines
-- **CONTEXT.md**: Architecture decisions and design rationale
-- **CONTRIBUTING.md**: Contribution process, code review criteria
-- **scripts/install.sh**: Automated cross-platform installation
-- **scripts/verify.sh**: Installation validation and diagnostics
-- **config.template.json**: Configuration template with examples
-- **LICENSE**: MIT License for open-source use
+### Added - Infrastructure
+- **.github/workflows/validate.yml**: CI/CD for project structure validation
+- **tests/run-tests.sh**: 34 automated checks of project structure
+- **scripts/install.sh**: Installation helper script
+- **scripts/verify.sh**: Installation verification
+- **config.template.json**: Configuration example
 
-### Added - Meta
-- **IMPROVEMENTS.md**: Summary of improvements addressing feedback
-- **CHANGELOG.md**: This file
+### Known Limitations (v0.1.0-alpha)
+**Everything is unproven.** This is a framework/instructions, not validated code.
 
-### Known Limitations (v1.0.0)
-- AI-generation detection is heuristic-based (not 100% accurate)
-- Cannot detect architectural problems
-- Cannot detect complex performance issues
-- Cannot validate business logic correctness
-- Accuracy not yet validated on real-world code samples
-- No CI/CD pipeline or automated tests
-- Configuration validation not implemented
+Specific unknowns:
+- **Error detection**: Untested on real code, accuracy unknown
+- **AI-pattern detection**: Heuristic-based, high false positive rate expected
+- **Code quality checks**: Theoretical, not validated
+- **Duplication detection**: Untested
+- **Overall accuracy**: Unknown, could be anywhere from 30-80%
 
-### Not Implemented (v1.0.0)
-- [ ] Automated testing of skill
-- [ ] Configuration file validation with error messages
-- [ ] CI/CD pipeline (GitHub Actions, etc.)
-- [ ] Real accuracy metrics from validation suite
+### What This Is NOT
+- ✗ Not production-ready
+- ✗ Not battle-tested
+- ✗ Not validated on real code
+- ✗ Not proven to be accurate
+- ✗ Not claiming any accuracy metrics (none exist yet)
+
+### What's Needed
+1. Real testing on 20+ code samples
+2. Accuracy metrics (% errors caught, false positive rate)
+3. Heuristic refinement based on failures
+4. Community feedback and validation
+5. Then: v0.2-alpha with real data
+
+### Next Steps
+- Run test scenarios from `tests/scenarios/`
+- Report results using [VALIDATION_TEMPLATE.md](VALIDATION_TEMPLATE.md)
+- Help identify what works and what doesn't
+- Suggest improvements to heuristics
 - [ ] Language-specific rule sets
 - [ ] Performance profiling analysis
 - [ ] Integration with external tools (ESLint, etc.)
