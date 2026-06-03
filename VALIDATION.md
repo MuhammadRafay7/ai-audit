@@ -1,172 +1,87 @@
-# Validation Results
+# Validation
 
-Results from real-world testing of ai-audit.
+How to test ai-audit and report results.
 
-## Contribute Results
+## Quick Test (15 minutes)
 
-Help validate ai-audit by testing it and reporting your findings.
+```bash
+# 1. Copy test scenario
+mkdir /tmp/ai-audit-test
+cd /tmp/ai-audit-test
+git init
+cp /path/to/ai-audit/tests/scenarios/01-missing-error-handling/code.js .
+git add code.js
 
-**See [VALIDATION_PROTOCOL.md](VALIDATION_PROTOCOL.md)** for step-by-step testing guide.
+# 2. Run skill
+/ai-audit > result.txt 2>&1
 
-**Use [VALIDATION_TEMPLATE.md](VALIDATION_TEMPLATE.md)** to format your report.
+# 3. Compare to expected
+cat /path/to/ai-audit/tests/scenarios/01-missing-error-handling/EXPECTED.md
 
-## Published Results
-
-Results will be listed here as they come in.
-
-### Status: No results yet
-
-This is an unvalidated alpha. The first real-world test results will appear here.
-
-**Be the first to test and report!**
-
-## How to Report
-
-### Option 1: GitHub Issue
-1. Run tests using [VALIDATION_PROTOCOL.md](VALIDATION_PROTOCOL.md)
-2. Fill template from [VALIDATION_TEMPLATE.md](VALIDATION_TEMPLATE.md)
-3. Create GitHub issue: `Validation Results: [Your Name] - [Date]`
-4. Paste the completed template
-
-### Option 2: Pull Request
-1. Complete testing and template
-2. Add result to `RESULTS/` directory as markdown file
-3. Create pull request with title: `Validation: [Your Name] - [Date]`
-
-## Data We're Collecting
-
-For each test run, we collect:
-
-- **Test scenarios** - Which predefined tests were run
-- **Accuracy per scenario** - How many known issues were found
-- **False positive rate** - How many non-issues were reported
-- **Real code results** - Testing on actual projects
-- **Environment** - OS, Claude Code version, etc.
-- **Qualitative feedback** - What worked, what didn't
-
-## Current Statistics
-
-```
-Total test runs: 0
-Average accuracy: N/A
-Best performing scenario: N/A
-Worst performing scenario: N/A
-Average false positive rate: N/A
+# 4. Report results (see template below)
 ```
 
-*(Will update as results come in)*
+## Report Results
 
-## Test Scenario Breakdown
-
-When enough results are collected, we'll show:
-
-| Scenario | Tests Run | Avg Accuracy | False Positives | Pass Rate |
-|----------|-----------|--------------|-----------------|-----------|
-| missing-error-handling | 0 | N/A | N/A | N/A |
-| null-reference | 0 | N/A | N/A | N/A |
-| code-duplication | 0 | N/A | N/A | N/A |
-
-## What Counts as Valid Testing
-
-To be included in validation results:
-
-✓ **Include:**
-- Completed template from VALIDATION_TEMPLATE.md
-- Environment details (OS, Claude Code version)
-- Results from at least one test scenario
-- Honest assessment (even if accuracy is low)
-- Your real observations
-
-✗ **Don't include:**
-- Incomplete results
-- Hypothetical testing ("I think it would...")
-- Results without environment info
-- Copied/fake data
-
-## How Accuracy is Calculated
+Create a GitHub issue with:
 
 ```
-Accuracy = (Known Issues Found) / (Total Known Issues) × 100%
+Test Run: [Your Name]
 
-Example:
-Scenario has 2 known issues
-ai-audit finds 1 of them
-Accuracy = 1/2 = 50%
+Environment:
+- OS: [macOS/Linux/Windows]
+- Claude Code version: [version]
+
+Test Scenario:
+- Scenario: 01-missing-error-handling (or 02, 03)
+- Known issues: 2
+- Found: [number]
+- Missed: [number]
+- False positives: [number]
+- Accuracy: [%]
+
+Real Code Testing (optional):
+- Tested on: [project type]
+- Files: [number]
+- Accuracy: [%]
+- Notes: [what worked/failed]
+
+Assessment:
+Would I use this regularly? [YES/MAYBE/NO]
+Why: [brief reason]
 ```
 
-If ai-audit reports false issues (not in the code), that's:
+## Test Scenarios
 
+Three predefined tests in `tests/scenarios/`:
+
+- **01-missing-error-handling** - 2 obvious async errors
+- **02-null-reference** - 2 missing null checks
+- **03-code-duplication** - 2 identical code blocks
+
+Each has `code.*` (the buggy code) and `EXPECTED.md` (what should be found).
+
+See `tests/scenarios/README.md` for details.
+
+## Real Code Testing
+
+Optional but valuable: test on your own code.
+
+```bash
+cd your-project
+git add your-changes
+/ai-audit
 ```
-False Positives = (Issues Reported) - (Known Issues)
 
-Example:
-2 known issues
-ai-audit reports 3 issues (1 is not actually there)
-False Positives = 1
-Accuracy = 2/2 = 100% (still found all known issues)
-But False Positive Rate = 1/3 = 33%
-```
+Compare output to known issues and false reports.
 
-## Trends We're Watching
+## Contribute
 
-As data comes in, we'll track:
-
-- **Accuracy trending up or down** - Are heuristics improving?
-- **False positive rate** - Acceptable? <15%?
-- **Which scenarios are harder** - Where does the skill struggle?
-- **False negatives per category** - What errors are being missed?
-- **Environment differences** - Does OS/version matter?
-
-## Feedback Loop
-
-1. **Results come in** → Added to VALIDATION.md
-2. **Patterns emerge** → SKILL.md heuristics refined
-3. **New version released** → People re-test
-4. **Cycle repeats** → Accuracy improves over time
-
-## Timeline
-
-- **June 2026** - Alpha released, seeking initial validation
-- **July 2026** - First 5-10 test runs expected, initial accuracy data
-- **Aug 2026** - 20+ test runs, heuristics refined, v0.2-alpha
-- **Sep 2026** - 50+ test runs, accuracy target 75%+, v1.0-beta
-- **Oct 2026** - Real-world usage feedback, v1.0-stable
-
-## Known Testing Challenges
-
-Some observations about what's hard to validate:
-
-**Easy to validate:**
-- Error detection (obvious bugs are clear)
-- Duplication detection (exact matches are obvious)
-- Code quality (function length is measurable)
-
-**Hard to validate:**
-- AI-pattern detection (subjective - is generic naming code AI-generated or just simple code?)
-- Best practices (varies by language/framework)
-- Edge cases (miss/false positive rates require large sample size)
-
-## Related Docs
-
-- [VALIDATION_PROTOCOL.md](VALIDATION_PROTOCOL.md) - How to test
-- [VALIDATION_TEMPLATE.md](VALIDATION_TEMPLATE.md) - How to report
-- [tests/scenarios/](tests/scenarios/) - Test code samples
-- [docs/limitations.md](docs/limitations.md) - Known limitations
-- [CHANGELOG.md](CHANGELOG.md) - Version history
-
-## Questions?
-
-Confused about how to validate? 
-
-- Read [VALIDATION_PROTOCOL.md](VALIDATION_PROTOCOL.md) first
-- Look at [VALIDATION_TEMPLATE.md](VALIDATION_TEMPLATE.md) for format
-- Run the test scenarios in `tests/scenarios/`
-- Open an issue if something isn't clear
+1. Test ai-audit on code (scenarios or your own)
+2. Fill in template above
+3. Create GitHub issue with results
+4. Help improve by reporting what works/fails
 
 ---
 
-**Version:** 0.1.0-alpha
-**Status:** Seeking initial validation
-**Last updated:** 2026-06-03
-
-Help us validate ai-audit. Test it, report results, and help make it better.
+**Help validate ai-audit by testing and sharing honest results.**
