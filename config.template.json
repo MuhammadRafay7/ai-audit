@@ -1,0 +1,31 @@
+{
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".git",
+    ".next",
+    "out",
+    ".turbo"
+  ],
+  "analyzeUnstagedOnly": false,
+  "severityThreshold": "medium",
+  "aiGeneratedThreshold": 0.3,
+  "enableDetailedReport": true,
+  "languages": [
+    "javascript",
+    "typescript",
+    "python",
+    "go",
+    "rust",
+    "java"
+  ],
+  "customRules": [],
+  "excludePatterns": [
+    "*.min.js",
+    "*.min.css",
+    "*.test.js",
+    "*.spec.js"
+  ]
+}
