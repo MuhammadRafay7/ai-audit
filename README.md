@@ -76,28 +76,74 @@ The skill examines:
 - Changes must be uncommitted
 - Claude Code must have git permissions
 
+## 📊 How It Actually Works
+
+**Important:** ai-audit is NOT a script or compiled tool. It's a Claude Code skill that:
+
+1. **Runs via Claude** — Uses Claude's AI to analyze your code
+2. **Interprets SKILL.md** — Follows detailed instructions in SKILL.md file
+3. **Analyzes git diff** — Examines your uncommitted changes
+4. **Generates reports** — Provides structured analysis with recommendations
+
+**Quality depends on:**
+- ✅ How good the SKILL.md instructions are
+- ✅ Claude's current capabilities
+- ⚠️ Complexity of your code
+- ⚠️ What's realistically detectable by AI (not 100% accurate)
+
+**What it CAN reliably find:**
+- Obvious bugs (missing null checks, unhandled errors)
+- Code patterns (duplicated logic, long functions)
+- Naming issues (generic variable names)
+- Basic best practice violations
+
+**What it CAN'T reliably find:**
+- Subtle architectural problems
+- Complex performance issues
+- Language-specific edge cases
+- Business logic errors
+
 ## 📊 Sample Output
 
+See realistic examples: [`docs/sample-outputs.md`](docs/sample-outputs.md)
+
+Here's what a typical analysis looks like:
+
 ```
-=== Code Quality Audit Report ===
-Generated on: 2026-06-03 21:15:00
+=== CODE QUALITY AUDIT ===
 
-📁 FILES ANALYZED (4)
-├── src/auth.ts (145 lines modified)
-├── utils/helpers.js (67 lines modified)
-├── config/settings.json (12 lines modified)
-└── styles/theme.css (89 lines modified)
+📁 FILES ANALYZED: 3 files
+├── src/auth.ts (89 lines)
+├── utils/helpers.js (45 lines)
+└── config/settings.json (23 lines)
 
-❌ CRITICAL ISSUES (2)
-├── auth.ts:34 - Missing error handling in validateToken()
-│   Severity: High | Fix: Wrap in try-catch block
-│
-└── helpers.js:22 - Potential null reference error
-    Severity: High | Fix: Add null check before accessing
+❌ ERRORS FOUND (1)
 
-⚠️  AI-GENERATED CODE INDICATORS (Moderate)
-├── Generic variable names (data, result, item, temp)
-│   Found in: helpers.js (4 instances)
+auth.ts:34 - Missing error handling
+  Problem: await validateToken() not wrapped in try-catch
+  Impact: Unhandled promise rejection if validation fails
+  Fix: Wrap with try-catch block
+
+⚠️  AI-GENERATED PATTERNS (Moderate 40%)
+- Generic names: result, data, item (4 instances in helpers.js)
+- Boilerplate try-catch pattern repeated 2x identically
+- Over-commenting on obvious code (2 instances)
+
+📈 QUALITY METRICS
+├── Overall Score: 6.5/10
+├── Critical Issues: 1
+├── Warnings: 3
+├── AI-Generated Likelihood: 40%
+└── Duplication: 8%
+
+💡 TOP PRIORITIES
+1. [CRITICAL] Add error handling to auth.ts:34
+2. Rename generic variables for clarity
+3. Extract duplicate error patterns
+
+✨ ASSESSMENT
+Code has solid structure but needs error handling fix and some cleanup.
+Ready to commit after addressing the critical issue.
 │
 ├── Over-commenting on simple functions
 │   Found in: auth.ts (2 instances)
@@ -233,6 +279,50 @@ Create `.ai-audit-config.json` in your project root to customize:
 - Similar patterns
 - Repeated utilities
 - Copy-paste code
+
+## ⚠️ Limitations & Expectations
+
+### What This Skill Actually Is
+- A **helper tool**, not a complete solution
+- An **AI-powered code reviewer**, with human-like limitations
+- A **pre-commit check** to catch obvious issues
+- A **learning tool** to understand patterns and best practices
+
+### Accuracy & Limitations
+- **~70-80% accurate** for obvious bugs and errors
+- **~60-70% accurate** for code quality issues
+- **~50-60% accurate** for AI-generated code detection (heuristic-based)
+- **NOT accurate** for architectural or complex performance issues
+
+### Known Limitations
+- Can't analyze language-specific edge cases perfectly
+- May produce false positives/negatives on AI detection
+- Depends on Claude's current capabilities
+- Won't catch subtle business logic errors
+- May miss context-dependent issues
+
+### Best Used For
+- **Quick pre-commit sanity checks**
+- **Catching obvious bugs before review**
+- **Understanding code patterns**
+- **Learning best practices**
+- **First-pass analysis** (not final review)
+
+### NOT a Replacement For
+- Thorough code review by humans
+- Automated linters (ESLint, Pylint, etc.)
+- Type checkers (TypeScript, mypy)
+- Security audits
+- Performance profiling
+
+### Tips for Best Results
+1. **Use with other tools** — Combine with ESLint, TypeScript, tests
+2. **Run before submitting PR** — Catch issues early
+3. **Use for learning** — Review recommendations and understand why
+4. **Set realistic expectations** — It's good but not perfect
+5. **Trust your instinct** — Override suggestions if you disagree
+
+---
 
 ## 🤝 Contributing
 
