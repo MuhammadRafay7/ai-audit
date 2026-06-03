@@ -41,40 +41,175 @@ Fix: How to fix it
 ### 3. AI-GENERATED CODE PATTERNS (Detection)
 Look for specific AI generation indicators:
 
-**Generic Variable Names** (strong indicator):
-- `data`, `result`, `item`, `temp`, `obj`, `val`, `x`, `res`, `resp`
-- `config`, `options`, `params`, `args` (without context)
-- Count instances and list files
+### AI Detection: Context-Aware Heuristics
 
-**Boilerplate/Template Code** (strong indicator):
-- Identical error handling in multiple places
-- Cookie-cutter try-catch blocks with same structure
-- Repeated initialization patterns
-- Template comments like "TODO: implement", placeholder code
+**IMPORTANT:** Not all generic names = AI-generated. Context matters heavily.
 
-**Over-Commenting** (moderate indicator):
-- Comments that just restate code: `// increment i` above `i++`
-- Comments on obvious operations: `// create user` above `const user = new User()`
-- Excessive comments on short, clear functions
+**Generic Variable Names** (WEAK indicator alone, needs context):
 
-**Verbose/Awkward Naming** (weak-moderate indicator):
-- Names like `getUserByIdAndFetchTheirProfile` (should be shorter)
-- Redundant suffixes: `userData`, `userList`, `userArray` (data type in name)
-- Stuttering: `httpServer`, `serverInstance` (repeats concept)
+❌ **High likelihood (multiple weak signals):**
+- `const data = apiResponse` (generic name for complex data)
+- `const result = performCalculation()` (unclear what result is)
+- `let item; for (item of items)` (item is redundant, could be just variable)
+- `const temp = transform(input)` (temp name, suggests placeholder)
+- **COMBINED with:** verbose comments, boilerplate patterns, placeholder code
+
+✅ **LEGITIMATE use (NOT AI-generated):**
+- `const data = JSON.parse(json)` (data is the parsed JSON, context is clear)
+- `const result = Promise.all([...])` (result of async operation, clear)
+- `for (const item of items)` (standard loop pattern, idiomatic)
+- `const config = loadConfig()` (loading config, context is clear)
+- `const response = await fetch()` (HTTP response, standard naming)
+- **Pattern:** Generic name makes sense in context, used once or twice
+
+**Decision rule:** Flag only if:
+1. **Multiple instances** (5+ uses of data/result/item in file) AND
+2. **Non-obvious context** (unclear what data/result refers to) AND
+3. **Other indicators present** (boilerplate, over-commenting, etc.)
+
+---
+
+**Boilerplate/Template Code** (strong indicator if identical):
+
+❌ **High likelihood:**
+- **Identical try-catch blocks** in 2+ places with exact same structure
+  ```javascript
+  try {
+    const result = await operation();
+    return result;
+  } catch (error) {
+    console.log(error);
+  }
+  ```
+  If seen verbatim 2+ times: **Strong AI indicator**
+
+- **Cookie-cutter initialization** repeated exactly
+- **Template comments:** "TODO: implement", "FIXME", "placeholder"
+- **Dummy/stub code** that doesn't do real work
+
+✅ **LEGITIMATE similar patterns (NOT AI-generated):**
+- Similar try-catch *structure* but different operations inside
+- Repeating framework boilerplate (Django, React, Spring patterns)
+- Standard error handling that's used consistently (good practice)
+- Idiomatic language patterns (every Promise needs .catch() etc)
+
+**Decision rule:** Flag only if:
+1. **Near-identical code** (>80% match) appears 2+ times AND
+2. **NOT explained by framework/pattern** AND
+3. **Could be extracted to function** but wasn't
+
+---
+
+**Over-Commenting** (moderate indicator if excessive):
+
+❌ **High likelihood:**
+```javascript
+// Get the user by ID
+const user = getUser(id);
+
+// Check if user exists
+if (!user) {
+  // Return error
+  return error;
+}
+
+// Return the user
+return user;
+```
+Every line has comment restating obvious code.
+
+✅ **LEGITIMATE comments (NOT AI-generated):**
+```javascript
+// User ID is from JWT, validate signature first
+const user = getUser(id);
+
+// Fetch from cache to avoid DB hit
+if (!user) {
+  user = await fetchFromCache(id);
+}
+```
+Comments explain *why*, not restate *what*.
+
+**Decision rule:** Flag only if:
+1. **Comment-to-code ratio >1:2** (more comments than code) AND
+2. **Comments restate code** (don't add information) AND
+3. **Trivial operations commented** (obvious what's happening)
+
+---
+
+**Verbose/Awkward Naming** (weak indicator):
+- `getUserByIdAndFetchTheirProfile` → better as `fetchUserProfile`
+- `userData`, `userList`, `userArray` → should be just `users` or `user`
+- `serverInstance`, `httpServer` → stuttering
+- BUT: Could also be developer being overly explicit (not necessarily AI)
+
+**Decision rule:** Only flag if combined with other indicators.
+
+---
 
 **Unnecessary Abstractions** (moderate indicator):
-- Wrapper functions that add no value: `function getData() { return data; }`
-- Excessive interfaces/types for simple operations
-- Multi-layer abstraction for simple task
+```javascript
+// Strong AI indicator:
+function getData() {
+  return data;  // Wrapper that adds no value
+}
 
-Report as:
+// Legitimate pattern:
+function getUserWithDefaults() {
+  return { ...defaultUser, ...loadedUser };  // Adds logic
+}
 ```
-AI-GENERATED LIKELIHOOD: [Low 0-30% | Moderate 30-60% | High 60-90%]
+
+**Decision rule:** Flag only if wrapper functions serve no purpose.
+
+---
+
+### Scoring AI-Generated Likelihood
+
+**Use a weighted scoring approach:**
+
+| Indicator | Strength | Points |
+|-----------|----------|--------|
+| Identical code block (2+ places) | Strong | +40 |
+| Generic names (5+ with unclear context) | Weak | +15 |
+| Boilerplate pattern repeated identically | Strong | +35 |
+| Over-commenting (>1:2 ratio) | Moderate | +25 |
+| Template comments ("TODO", "FIXME") | Strong | +30 |
+| Unnecessary wrapper functions | Moderate | +20 |
+
+**Total Score Interpretation:**
+- 0-20 points: Low (0-30%)
+- 20-50 points: Moderate (30-60%)
+- 50-80 points: High (60-80%)
+- 80+ points: Very High (80%+)
+
+**IMPORTANT:** 
+- Only count if indicators are INDEPENDENT
+- Ignore if explained by framework/pattern/language idiom
+- Always note confidence level and uncertainty
+- **Default to skeptical:** "Could be AI, but also could be legitimate pattern"
+
+---
+
+**Reporting AI-Generated Code:**
+
+```
+🤖 AI-GENERATED CODE ASSESSMENT: [Confidence]
 
 Indicators found:
-- Generic names: item, data, result (3+ occurrences in file.js)
-- Boilerplate: try-catch pattern repeated 2x identically (file.ts:15, file.ts:42)
-- Over-commenting: Function descriptions above simple operations (2 instances)
+✓ Identical try-catch in 2 places (high weight)
+✓ Generic names with unclear context (moderate weight)
+? Over-commenting (but could be style choice)
+
+Score: 45/100 → Moderate likelihood (40-50%)
+
+Confidence: Medium
+- Multiple indicators present
+- Some could be legitimate patterns
+- Recommend manual review
+
+Note: Cannot definitively say code is AI-generated without seeing prompts.
+These are heuristic patterns, not proof.
 ```
 
 ### 4. BEST PRACTICE VIOLATIONS
