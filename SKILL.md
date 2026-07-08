@@ -1,3 +1,7 @@
+---
+name: ai-audit
+description: Analyze uncommitted code changes for errors, code quality issues, and AI-generated patterns
+---
 # ai-audit Skill
 
 ⚠️ **Status: Alpha, Unvalidated**
